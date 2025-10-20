@@ -1,8 +1,4 @@
-# wallet
-
-바이낸스에서 **FDUSD API를 외부에서 사용**하려면 다음 단계를 따르면 됩니다:
-
----
+# 바이낸스에서 **FDUSD API 사용**
 
 ### ✅ **1. 바이낸스 개발자 API 문서 접속**
 - 공식 문서: [Binance API Docs](https://www.binance.com/en/binance-api)  
@@ -262,7 +258,7 @@ h2. 6. 참고 자료
 ✅ **Confluence 문서에 “자동매매 봇 가이드” 섹션 포함**  
 ✅ **Docker로 배포 가능한 구조**  
 
-아래는 **FDUSD 자동매매 봇을 Docker로 배포하는 기본 구조**입니다.
+# **FDUSD 자동매매 봇을 Docker로 배포하는 기본 구조**
 
 ---
 
