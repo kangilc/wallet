@@ -51,7 +51,7 @@
 ```python
 import time
 import hmac
-import hashlib
+import hashlib  
 import requests
 
 API_KEY = "YOUR_API_KEY"
@@ -90,6 +90,83 @@ def place_order(symbol="FDUSDUSDT", side="BUY", quantity="10", price="0.999"):
 # 실행 예시
 print("FDUSD 시세:", get_price())
 # print(place_order())  # 실제 주문 시 주석 해제
+```
+
+```java
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.*;
+import java.util.*;
+
+public class BinanceFDUSD {
+    private static final String API_KEY = "YOUR_API_KEY";
+    private static final String SECRET_KEY = "YOUR_SECRET_KEY";
+    private static final String BASE_URL = "https://api.binance.com";
+
+    public static String sign(Map<String, String> params) throws Exception {
+        StringBuilder query = new StringBuilder();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            query.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+        }
+        String queryString = query.substring(0, query.length() - 1);
+
+        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(SECRET_KEY.getBytes(), "HmacSHA256");
+        sha256_HMAC.init(secretKeySpec);
+        String signature = bytesToHex(sha256_HMAC.doFinal(queryString.getBytes()));
+
+        return queryString + "&signature=" + signature;
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
+
+    public static String getPrice(String symbol) throws IOException {
+        String urlStr = BASE_URL + "/api/v3/ticker/price?symbol=" + symbol;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("GET");
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String inputLine;
+        String placeOrder(String symbol, String side, String quantity, String price) throws Exception {
+        String endpoint = "/api/v3/order";
+        long timestamp = System.currentTimeMillis();
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("symbol", symbol);
+        params.put("side", side);
+        params.put("type", "LIMIT");
+        params.put("timeInForce", "GTC");
+        params.put("quantity", quantity);
+       timestamp", String.valueOf(timestamp));
+
+        String signedParams = sign(params);
+        URL url = new URL(BASE_URL + endpoint);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("X-MBX-APIKEY", API_KEY);
+        conn.setDoOutput(true);
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(signedParams.getBytes());
+            os.flush();
+        }
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) response.append(inputLine);
+        in.close();
+        return response.toString();
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println("FDUSD 시세: " + getPrice("FDUSDUSDT"));
+        // System.out.println(placeOrder("FDUSDUSDT", "BUY", "10", "0.999"));
+    }
+}
 ```
 
 **주의**:  
@@ -188,6 +265,34 @@ while True:
             print("매도 조건 충족 → 주문 실행")
             print(place_order("SELL", QUANTITY, str(TARGET_SELL)))
     time.sleep(3)
+```
+
+```java
+public class AutoTradingBot {
+    private static final double TARGET_BUY = 0.995;
+    private static final double TARGET_SELL = 1.005;
+    private static final String SYMBOL = "FDUSDUSDT";
+
+    public static void main(String[] args) throws Exception {
+        while (true) {
+            try {
+               .replaceAll("[^0-9.]", ""));
+                System.out.println("현재 FDUSD 시세: " + price);
+
+                if (price <= TARGET_BUY) {
+                    System.out.println("매수 조건 충족 → 주문 실행");
+                    System.out.println(BinanceFDUSD.placeOrder(SYMBOL, "BUY", "10", String.valueOf(TARGET_BUY)));
+                } else if (price >= TARGET_SELL) {
+                    System.out.println("매도 조건 충족 → 주문 실행");
+                    System.out.println(BinanceFDUSD.placeOrder(SYMBOL, "SELL", "10", String.valueOf(TARGET_SELL)));
+                }
+            } catch (Exception e) {
+                System.err.println("[ERROR] " + e.getMessage());
+            }
+            Thread.sleep(3000);
+        }
+    }
+}
 ```
 
 **예외 처리 포인트**:
