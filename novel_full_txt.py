@@ -44,10 +44,21 @@ def get_novel_content(driver, url):
         if content_div:
             return content_div.get_text(separator='\n', strip=True)
         else:
-            return "본문 내용을 찾을 수 없습니다."
+            # Debugging for "Forbidden" or other issues
+            print(f"경고: URL {url}에서 본문 내용을 찾을 수 없습니다.")
+            debug_filename_prefix = url.replace('https://', '').replace('http://', '').replace('/', '_').replace('?', '_').replace('=', '_').replace('&', '_')[:50]
+            driver.save_screenshot(f"temp/debug_forbidden_screenshot_{debug_filename_prefix}.png")
+            with open(f"temp/debug_forbidden_page_source_{debug_filename_prefix}.html", "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+            return f"본문 내용을 찾을 수 없습니다. 디버그 파일 확인: temp/debug_forbidden_screenshot_{debug_filename_prefix}.png"
 
     except Exception as e:
-        return f"오류 발생: {e}"
+        print(f"오류 발생: {e} (URL: {url})")
+        debug_filename_prefix = url.replace('https://', '').replace('http://', '').replace('/', '_').replace('?', '_').replace('=', '_').replace('&', '_')[:50]
+        driver.save_screenshot(f"temp/debug_forbidden_screenshot_{debug_filename_prefix}.png")
+        with open(f"temp/debug_forbidden_page_source_{debug_filename_prefix}.html", "w", encoding="utf-8") as f:
+            f.write(driver.page_source)
+        return f"오류 발생: {e}. 디버그 파일 확인: temp/debug_forbidden_screenshot_{debug_filename_prefix}.png"
 
 
 
